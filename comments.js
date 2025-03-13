@@ -1,29 +1,64 @@
-// Create a web Server
+// Create Web Server
 const express = require('express');
 const app = express();
+const port = 3000;
 
-// Create a GET route that returns all comments
+// Import comments
+const comments = require('./comments');
+// Import bodyParser
+const bodyParser = require('body-parser');
+
+// Middleware
+app.use(bodyParser.json());
+
+// Get all comments
 app.get('/comments', (req, res) => {
-  res.send('GET request to the homepage')
+  res.json(comments);
 });
 
-// Create a POST route that creates a new comment
+// Get comment by id
+app.get('/comments/:id', (req, res) => {
+  const comment = comments.find((comment) => comment.id === parseInt(req.params.id));
+  if (comment) {
+    res.json(comment);
+  } else {
+    res.status(404).send('Comment not found');
+  }
+});
+
+// Create new comment
 app.post('/comments', (req, res) => {
-  res.send('POST request to the homepage')
+  const comment = {
+    id: comments.length + 1,
+    body: req.body.body
+  };
+  comments.push(comment);
+  res.json(comment);
 });
 
-// Create a PUT route that updates a comment
+// Update comment
 app.put('/comments/:id', (req, res) => {
-  res.send('PUT request to the homepage')
+  const comment = comments.find((comment) => comment.id === parseInt(req.params.id));
+  if (comment) {
+    comment.body = req.body.body;
+    res.json(comment);
+  } else {
+    res.status(404).send('Comment not found');
+  }
 });
 
-// Create a DELETE route that deletes a comment
+// Delete comment
 app.delete('/comments/:id', (req, res) => {
-  res.send('DELETE request to the homepage')
+  const index = comments.findIndex((comment) => comment.id === parseInt(req.params.id));
+  if (index !== -1) {
+    comments.splice(index, 1);
+    res.send('Comment deleted');
+  } else {
+    res.status(404).send('Comment not found');
+  }
 });
 
-// Start the server
-app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
+// Start server
+app.listen(port, () => {
+  console.log(`Server started on http://localhost:${port}`);
 });
-// End of Path: comments.js
